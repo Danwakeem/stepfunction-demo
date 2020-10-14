@@ -1,0 +1,72 @@
+service: step-function-service
+frameworkVersion: ">=1.11.0 <2.0.0"
+provider:
+  name: aws
+  apiKeys:
+    - ${self:service}-${opt:stage}-internal
+  runtime: nodejs12.x
+  versionFunctions: false
+  cfLogs: true
+  tracing:
+    apiGateway: true
+    lambda: true
+  environment:
+    NODE_ENV: production
+    STAGE: ${opt:stage}
+    LOG_LEVEL: ${self:custom.logLevel.${opt:stage}, self:custom.logLevel.default}
+
+plugins:
+  - serverless-offline
+  - serverless-step-functions
+
+custom:
+  logLevel:
+    production: WARN
+    default: DEBUG
+
+package:
+  exclude:
+    - src/**/*.test.js
+    - src/**/*.snap
+    - '.*'
+    - '*.sh'
+    - package.json
+    - yarn.lock
+    - README.md
+
+functions:
+  firstState:
+    handler: src/states/first-state.handler
+
+stepFunctions:
+  stateMachines:
+    stepFunctionTest:
+      events:
+        - http:
+            path: start
+            method: POST
+      name: step-function-sample-${opt:stage}
+      definition:
+        Comment: "Step function sample"
+        StartAt: ChoiceStep
+        States:
+          ChoiceStep:
+            Type: Choice
+            Choices:
+              - StringEquals: "end"
+                Variable: "$.eventType"
+                Next: Halt
+            Default: WaitTime
+          Halt:
+            Type: Pass
+            End: true
+          WaitTime:
+            Type: Wait
+            Seconds: 30
+            Next: FirstState
+          FirstState:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [firstState, Arn]
+            End: true
+          

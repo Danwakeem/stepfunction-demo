@@ -1,0 +1,22 @@
+{
+  "name": "step-functions",
+  "version": "1.0.0",
+  "description": "Step function demo for US engineering guild",
+  "main": "index.js",
+  "repository": "https://github.com/Danwakeem/stepfunction-demo",
+  "author": "Danwakeem",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "deploy": "yarn sls deploy --stage \"$ACG_ENV\" --region \"$AWS_REGION\" --verbose"
+  },
+  "devDependencies": {
+    "@a-cloud-guru/kumo": "^0.5.0",
+    "oprah": "^3.0.1",
+    "serverless": "1.66.0",
+    "serverless-domain-manager": "3.3.1",
+    "serverless-log-forwarding": "^1.4.0",
+    "serverless-offline": "5.12.1",
+    "serverless-step-functions": "^2.26.0"
+  }
+}
